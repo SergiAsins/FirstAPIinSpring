@@ -35,19 +35,26 @@ public class BookController {
 
     @PostMapping
     public Book createBook(@RequestBody Book book) {
-
         // Check that the ISBN does not already exist; if it does, return (bad_request)
-
         bookRepository.save(book);
-        return book; // OK (200) or Created (201)
+        return book; // 200
     }
 
     @DeleteMapping("/{isbn}")
     public void deleteBookByIsbn(@PathVariable String isbn) {
-        // If the ISBN does not exist, return a 404
-        // If the book is deleted, return OK
         bookRepository.deleteByIsbn(isbn);
     }
 
-    // Update -> modify a book by its ISBN (PUT)
+    @PutMapping("/{isbn}")
+    public Book updateBookByIsbn(@PathVariable String isbn, @RequestBody Book updatedBook){
+       Optional<Book> bookToUpdate = bookRepository.findByIsbn(isbn);
+
+       if (bookToUpdate.isEmpty()){
+           throw new RuntimeException("Book with ISBN " + isbn + " not found!");
+       }
+
+       bookRepository.deleteByIsbn(isbn);
+       bookRepository.save(updatedBook);
+       return updatedBook;
+    }
 }
